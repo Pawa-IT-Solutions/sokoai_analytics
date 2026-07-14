@@ -50,6 +50,18 @@ export default function SokoAIDashboard() {
                         filteredOrdersLength={filteredOrders.length}
                     />
 
+                    {activeTab === 'model1' && (
+                        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl flex-shrink-0">🎯</div>
+                                <div>
+                                    <h3 className="text-base font-black text-slate-900">Predict Visitor Purchases — ML.PREDICT Output</h3>
+                                    <p className="text-xs text-slate-500 mt-0.5">Logistic Regression · Predicting return-visit purchase probability from first-session behaviour</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <KPIRow
                         activeTab={activeTab}
                         totalCustomers={totalCustomers}
@@ -65,7 +77,7 @@ export default function SokoAIDashboard() {
                     )}
 
                     {activeTab === 'model1' && (
-                        <FutureBuyerPredictorView setActionNotify={setActionNotify} />
+                        <FutureBuyerPredictorView setActionNotify={setActionNotify} showHeader={false} />
                     )}
 
                     {activeTab === 'model2' && (

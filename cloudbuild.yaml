@@ -1,0 +1,75 @@
+# Cloud Build pipeline for Cloud Run (container build + deploy).
+# This supports a unified frontend+API runtime once your container serves both.
+#
+# Required substitutions:
+#   _REGION: Cloud Run region (for example us-central1)
+#   _SERVICE: Cloud Run service name (for example sokoai-dashboard)
+#   _AR_REPO: Artifact Registry repository name (for example webapps)
+#
+# Optional substitutions:
+#   _IMAGE: image name (default sokoai-dashboard)
+#   _PLATFORM: Cloud Run platform (default managed)
+#   _ALLOW_UNAUTH: true|false for public access (default true)
+#   _RUNTIME_SA: Cloud Run runtime service account email
+#
+# Example manual run:
+# gcloud builds submit --config cloudbuild.yaml \
+#   --substitutions _REGION=us-central1,_SERVICE=sokoai-dashboard,_AR_REPO=webapps
+
+steps:
+  - id: Build container image
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$BUILD_ID
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:latest
+      - .
+
+  - id: Push image (commit tag)
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$BUILD_ID
+
+  - id: Push image (latest tag)
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:latest
+
+  - id: Deploy to Cloud Run
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        AUTH_FLAG="--allow-unauthenticated"
+        if [ "${_ALLOW_UNAUTH}" = "false" ]; then
+          AUTH_FLAG="--no-allow-unauthenticated"
+        fi
+
+        gcloud run deploy "${_SERVICE}" \
+          --image "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$BUILD_ID" \
+          --region "${_REGION}" \
+          --platform "${_PLATFORM}" \
+          --service-account "${_RUNTIME_SA}" \
+          $${AUTH_FLAG}
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE: sokoai-dashboard
+  _AR_REPO: webapps
+  _IMAGE: sokoai-dashboard
+  _PLATFORM: managed
+  _ALLOW_UNAUTH: "true"
+  _RUNTIME_SA: cloud-mastery-1@pawait-data-hub.iam.gserviceaccount.com
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:$BUILD_ID
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_IMAGE}:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY

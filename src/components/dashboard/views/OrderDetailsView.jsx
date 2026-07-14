@@ -23,13 +23,46 @@ export function OrderDetailsView({
   const statusMax = statusData[0]?.[1] || 1;
   const topProductMax = topProductsData[0]?.[1] || 1;
 
-  // Donut segments for payment pie
-  const donutSegments = useMemo(() => {
-    let offset = 25; // start at top
+  // Pie segments for payment mix
+  const pieSegments = useMemo(() => {
+    const toPoint = (angleDeg) => {
+      const angle = (angleDeg - 90) * (Math.PI / 180);
+      return {
+        x: 18 + 14 * Math.cos(angle),
+        y: 18 + 14 * Math.sin(angle),
+      };
+    };
+
+    let startAngle = 0;
     return paymentData.map(([method, count], i) => {
       const pct = (count / paymentTotal) * 100;
-      const seg = { method, count, pct, offset, color: PAYMENT_COLORS[i % PAYMENT_COLORS.length] };
-      offset += pct;
+      const sweep = (pct / 100) * 360;
+      const endAngle = startAngle + sweep;
+      const start = toPoint(startAngle);
+      const end = toPoint(endAngle);
+      const largeArcFlag = sweep > 180 ? 1 : 0;
+      const path = `M 18 18 L ${start.x.toFixed(3)} ${start.y.toFixed(3)} A 14 14 0 ${largeArcFlag} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)} Z`;
+      const midAngle = startAngle + (sweep / 2);
+      const labelPoint = (() => {
+        const angle = (midAngle - 90) * (Math.PI / 180);
+        return {
+          x: 18 + 8.5 * Math.cos(angle),
+          y: 18 + 8.5 * Math.sin(angle),
+        };
+      })();
+
+      const seg = {
+        method,
+        count,
+        pct,
+        color: PAYMENT_COLORS[i % PAYMENT_COLORS.length],
+        path,
+        fullCircle: sweep >= 359.999,
+        labelX: labelPoint.x,
+        labelY: labelPoint.y,
+      };
+
+      startAngle = endAngle;
       return seg;
     });
   }, [paymentData, paymentTotal]);
@@ -50,35 +83,48 @@ export function OrderDetailsView({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
           {/* Card 1: Payment Method Donut */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">Payment Mix</span>
-              <span className="text-xs text-slate-400 font-semibold">{filteredOrders.length} orders</span>
+          <div className="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm flex flex-col gap-2">
+            <div className="-mx-3 -mt-3 mb-1 px-3 py-2 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Payment Mix</span>
+              <span className="text-xs text-slate-300 font-semibold">{filteredOrders.length} orders</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-3">
               <div className="relative flex-shrink-0">
-                <svg className="w-28 h-28 -rotate-90" viewBox="0 0 36 36">
-                  <circle cx="18" cy="18" r="14" fill="none" stroke="#f1f5f9" strokeWidth="5" />
-                  {donutSegments.map((seg, i) => (
-                    <circle key={i} cx="18" cy="18" r="14" fill="none"
-                      stroke={seg.color} strokeWidth="5"
-                      strokeDasharray={`${seg.pct} ${100 - seg.pct}`}
-                      strokeDashoffset={100 - seg.offset}
-                    />
+                <svg className="w-48 h-48" viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="14" fill="#f1f5f9" />
+                  {pieSegments.map((seg, i) => (
+                    seg.fullCircle ? (
+                      <circle key={i} cx="18" cy="18" r="14" fill={seg.color} />
+                    ) : (
+                      <path
+                        key={i}
+                        d={seg.path}
+                        fill={seg.color}
+                      />
+                    )
+                  ))}
+                  {pieSegments.map((seg, i) => (
+                    seg.pct >= 6 ? (
+                      <text
+                        key={`label-${i}`}
+                        x={seg.labelX}
+                        y={seg.labelY}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-white font-black"
+                        style={{ fontSize: '2.4px' }}
+                      >
+                        {seg.pct.toFixed(0)}%
+                      </text>
+                    ) : null
                   ))}
                 </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[12px] font-black text-slate-700">{paymentData.length}</span>
-                </div>
               </div>
-              <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-                {donutSegments.slice(0, 5).map((seg, i) => (
-                  <div key={i} className="flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color }}></span>
-                      <span className="text-xs text-slate-600 font-semibold truncate">{seg.method}</span>
-                    </div>
-                    <span className="text-xs font-black text-slate-800 flex-shrink-0">{seg.pct.toFixed(1)}%</span>
+              <div className="w-full flex flex-wrap gap-x-3 gap-y-1.5">
+                {pieSegments.map((seg, i) => (
+                  <div key={i} className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: seg.color }}></span>
+                    <span className="text-[11px] text-slate-600 font-semibold truncate">{seg.method}</span>
                   </div>
                 ))}
               </div>
@@ -87,9 +133,9 @@ export function OrderDetailsView({
 
           {/* Card 2: Category Bar Chart */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">By Category</span>
-              <span className="text-xs text-slate-400 font-semibold">items</span>
+            <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">By Category</span>
+              <span className="text-xs text-slate-300 font-semibold">items</span>
             </div>
             <div className="flex flex-col gap-2 flex-1">
               {categoryData.length === 0 ? (
@@ -122,9 +168,9 @@ export function OrderDetailsView({
 
           {/* Card 3: Status Distribution */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">Order Status</span>
-              <span className="text-xs text-slate-400 font-semibold">count</span>
+            <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Order Status</span>
+              <span className="text-xs text-slate-300 font-semibold">count</span>
             </div>
             <div className="flex flex-col gap-2 flex-1">
               {statusData.length === 0 ? (
@@ -160,9 +206,9 @@ export function OrderDetailsView({
 
           {/* Card 4: Live Revenue KPIs */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">Revenue KPIs</span>
-              <span className="text-xs text-slate-400 font-semibold">{hasActiveFilters ? 'filtered' : 'all data'}</span>
+            <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Revenue KPIs</span>
+              <span className="text-xs text-slate-300 font-semibold">{hasActiveFilters ? 'filtered' : 'all data'}</span>
             </div>
             {(() => {
               // When using the 10-row sample with no filters, use the real full-dataset figures
@@ -209,9 +255,9 @@ export function OrderDetailsView({
 
           {/* Card 5: Revenue Over Time — broken down by category */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:col-span-2 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">Revenue Over Time by Payment Method</span>
-              <span className="text-xs text-slate-400 font-semibold">{revenueByCategoryDate.allDates.length} days</span>
+            <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Revenue Over Time by Payment Method</span>
+              <span className="text-xs text-slate-300 font-semibold">{revenueByCategoryDate.allDates.length} days</span>
             </div>
             {revenueByCategoryDate.allDates.length < 2 || revenueByCategoryDate.lines.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-slate-300 text-sm py-10">
@@ -284,9 +330,9 @@ export function OrderDetailsView({
 
           {/* Card 6: Top Products by Revenue — data-driven */}
           <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:col-span-1 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-700 text-sm font-black uppercase tracking-wider">Top Products</span>
-              <span className="text-xs text-slate-400 font-semibold">by revenue</span>
+            <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Top Products</span>
+              <span className="text-xs text-slate-300 font-semibold">by revenue</span>
             </div>
             {topProductsData.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-slate-300 text-xs">No data</div>
@@ -325,6 +371,10 @@ export function OrderDetailsView({
         </div>
 
         <div className="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+          <div className="px-5 py-3 bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+            <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Orders Table</span>
+            <span className="text-xs text-slate-300 font-semibold">{filteredOrders.length} rows</span>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm border-collapse">
               <thead>

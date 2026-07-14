@@ -10,7 +10,11 @@ export function Sidebar({ activeTab, setActiveTab }) {
 
         {/* Navigation Section */}
         <div className="px-4 py-6">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 block mb-4">SOKOAI ANALYTICS</span>
+          <div className="px-2 mb-4">
+            <span className="block w-full rounded-lg bg-slate-900 text-white text-[11px] font-extrabold uppercase tracking-[0.2em] px-3 py-2 text-center shadow-sm">
+              SOKOAI ANALYTICS
+            </span>
+          </div>
           <nav className="space-y-1">
 
             {/* Tab 1: Order details */}
@@ -24,7 +28,18 @@ export function Sidebar({ activeTab, setActiveTab }) {
               <span>📦</span> Order Details Explorer
             </button>
 
-            {/* Tab 2: Customer Segments */}
+            {/* Tab 2: Predict Visitor Purchases */}
+            <button
+              onClick={() => setActiveTab('model1')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model1'
+                ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
+                }`}
+            >
+              <span>🎯</span> Predict Visitor Purchases
+            </button>
+
+            {/* Tab 3: Customer Segments */}
             <button
               onClick={() => setActiveTab('model2')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model2'
@@ -33,17 +48,6 @@ export function Sidebar({ activeTab, setActiveTab }) {
                 }`}
             >
               <span>👥</span> Customer Segments
-            </button>
-
-            {/* Tab 3: Future Buyer Predictor */}
-            <button
-              onClick={() => setActiveTab('model1')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model1'
-                ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
-                }`}
-            >
-              <span>🎯</span> Future Buyer Predictor
             </button>
           </nav>
         </div>

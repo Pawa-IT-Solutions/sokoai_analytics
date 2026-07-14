@@ -17,7 +17,7 @@ export function Header({
       <div className="flex items-start gap-3 flex-shrink-0">
         <div className="text-2xl text-[#6366f1] mt-1">✨</div>
         <div>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">SokoAI Intelligent Decision Hub</h1>
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">SokoAI Intelligence Hub</h1>
           <p className="text-xs text-slate-500 mt-0.5">Powered by Gemini 2.5 Pro + BQML</p>
         </div>
       </div>

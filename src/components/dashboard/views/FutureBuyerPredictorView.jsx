@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-export function FutureBuyerPredictorView({ setActionNotify }) {
+export function FutureBuyerPredictorView({ setActionNotify, showHeader = true }) {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(50);
     const [sortBy, setSortBy] = useState('prob');
@@ -123,18 +123,20 @@ export function FutureBuyerPredictorView({ setActionNotify }) {
 
     return (
         <div className="space-y-5">
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl flex-shrink-0">🎯</div>
-                    <div>
-                        <h3 className="text-base font-black text-slate-900">Future Buyer Predictor — ML.PREDICT Output</h3>
-                        <p className="text-xs text-slate-500 mt-0.5">Logistic Regression · Predicting return-visit purchase probability from first-session behaviour</p>
+            {showHeader && (
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xl flex-shrink-0">🎯</div>
+                        <div>
+                            <h3 className="text-base font-black text-slate-900">Predict Visitor Purchases — ML.PREDICT Output</h3>
+                            <p className="text-xs text-slate-500 mt-0.5">Logistic Regression · Predicting return-visit purchase probability from first-session behaviour</p>
+                        </div>
                     </div>
+                    <span className="bg-slate-100 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full text-xs font-mono flex-shrink-0">
+                        {total} sessions
+                    </span>
                 </div>
-                <span className="bg-slate-100 border border-slate-200 text-slate-600 px-3 py-1.5 rounded-full text-xs font-mono flex-shrink-0">
-                    {total} sessions
-                </span>
-            </div>
+            )}
 
             {error && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm">

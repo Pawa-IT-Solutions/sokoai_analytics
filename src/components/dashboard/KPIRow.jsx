@@ -16,47 +16,52 @@ export function KPIRow({ activeTab, totalCustomers, totalRevenue, totalOrders, a
   ), MODEL_2_SEGMENTS[0]);
 
   // DYNAMIC KPI CARD RENDERING
-  const kpiSpendLabel = activeTab === 'orders' ? "Total Revenue" : "Avg spend (VIP Centroid)";
-  const kpiSpendValue = activeTab === 'orders' ? formatCurrency(totalRevenue) : "KES 282,885";
+  const kpiSpendLabel = activeTab === 'orders' ? 'Total Revenue' : activeTab === 'model2' ? 'Top Value Segment' : 'Avg spend (VIP Centroid)';
+  const kpiSpendValue = activeTab === 'orders' ? formatCurrency(totalRevenue) : activeTab === 'model2' ? topValueSegment.totalSpend : 'KES 282,885';
+  const kpiSpendSubtext = activeTab === 'orders' ? 'Gross merchandise value' : activeTab === 'model2' ? topValueSegment.name : 'AOV Centroid 2';
+  const kpiSpendIcon = activeTab === 'orders' ? '💰' : activeTab === 'model2' ? '🏆' : '💰';
 
   const kpiAccuracyLabel = activeTab === 'orders'
     ? 'Total Orders'
     : activeTab === 'model2'
-      ? 'Highest Cancellation Risk'
+      ? 'Avg spend (VIP Centroid)'
       : 'Class Prediction Accuracy';
   const kpiAccuracyValue = activeTab === 'orders'
     ? totalOrders.toLocaleString()
     : activeTab === 'model2'
-      ? highestRiskSegment.cancellation
+      ? 'KES 282,885'
       : '0.9103';
+  const kpiAccuracySubtext = activeTab === 'orders' ? 'Unique order numbers' : activeTab === 'model2' ? 'AOV Centroid 2' : 'Model 2 ROC AUC';
+  const kpiAccuracyIcon = activeTab === 'orders' ? '📦' : activeTab === 'model2' ? '💰' : '📦';
 
   const card4Label = activeTab === 'orders'
     ? 'Avg Order Value'
     : activeTab === 'model2'
-      ? 'Top Value Segment'
+      ? 'Highest Cancellation Risk'
       : 'Synchronized Records';
   const card4Value = activeTab === 'orders'
     ? formatCurrency(avgOrderValue)
     : activeTab === 'model2'
-      ? topValueSegment.totalSpend
+      ? highestRiskSegment.cancellation
       : '741,721';
   const card4Subtext = activeTab === 'orders'
     ? 'Revenue per unique order'
     : activeTab === 'model2'
-      ? topValueSegment.name
+      ? highestRiskSegment.name
       : 'Purchaser / Visitor Ratio';
-  const card4Icon = activeTab === 'orders' ? '📈' : activeTab === 'model2' ? '🏆' : '🔄';
+  const card4Icon = activeTab === 'orders' ? '📈' : activeTab === 'model2' ? '⚠️' : '🔄';
 
   return (
     <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
       {/* KPI 1: Total Customers */}
       <div className="relative bg-white border border-slate-200 shadow-sm rounded-2xl p-5 overflow-hidden group hover:shadow-md transition-shadow">
-        <div className="absolute top-0 left-0 w-1 h-full bg-sky-500 rounded-l-2xl"></div>
+        <div className="-mx-5 -mt-5 mb-3 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+          <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Total Customers</span>
+        </div>
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest block">Total Customers</span>
-            <h3 className="text-2xl font-black text-slate-900 mt-1.5 tracking-tight">{totalCustomers.toLocaleString()}</h3>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{totalCustomers.toLocaleString()}</h3>
           </div>
           <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-lg flex-shrink-0">
             👤
@@ -70,55 +75,56 @@ export function KPIRow({ activeTab, totalCustomers, totalRevenue, totalOrders, a
         </div>
       </div>
 
-      {/* KPI 2: Total Revenue / Avg VIP Spend */}
+      {/* KPI 2: Total Revenue / Top Value Segment */}
       <div className="relative bg-white border border-slate-200 shadow-sm rounded-2xl p-5 overflow-hidden group hover:shadow-md transition-shadow">
-        <div className="absolute top-0 left-0 w-1 h-full bg-violet-500 rounded-l-2xl"></div>
+        <div className="-mx-5 -mt-5 mb-3 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+          <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">{kpiSpendLabel}</span>
+        </div>
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest block">{kpiSpendLabel}</span>
-            <h3 className="text-xl font-black text-slate-900 mt-1.5 tracking-tight leading-tight">{kpiSpendValue}</h3>
+            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">{kpiSpendValue}</h3>
           </div>
           <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center text-lg flex-shrink-0">
-            💰
+            {kpiSpendIcon}
           </div>
         </div>
         <div className="mt-3 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
           <span className="text-violet-600 text-xs font-semibold">
-            {activeTab === 'orders' ? 'Gross merchandise value' : 'AOV Centroid 2'}
+            {kpiSpendSubtext}
           </span>
         </div>
       </div>
 
-      {/* KPI 3: Total Orders / Prediction Accuracy */}
+      {/* KPI 3: Total Orders / Avg VIP Spend */}
       <div className="relative bg-white border border-slate-200 shadow-sm rounded-2xl p-5 overflow-hidden group hover:shadow-md transition-shadow">
-        <div className="absolute top-0 left-0 w-1 h-full bg-amber-500 rounded-l-2xl"></div>
+        <div className="-mx-5 -mt-5 mb-3 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+          <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">{kpiAccuracyLabel}</span>
+        </div>
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest block">{kpiAccuracyLabel}</span>
-            <h3 className="text-2xl font-black text-slate-900 mt-1.5 tracking-tight">{kpiAccuracyValue}</h3>
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{kpiAccuracyValue}</h3>
           </div>
           <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-lg flex-shrink-0">
-            📦
+            {kpiAccuracyIcon}
           </div>
         </div>
         <div className="mt-3 flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
           <span className="text-amber-600 text-xs font-semibold">
-            {activeTab === 'orders' ? 'Unique order numbers' : activeTab === 'model2' ? highestRiskSegment.name : 'Model 2 ROC AUC'}
+            {kpiAccuracySubtext}
           </span>
         </div>
       </div>
 
       {/* KPI 4: Avg Order Value (orders tab) / Synchronized Records (other tabs) */}
       <div className="relative bg-white border border-slate-200 shadow-sm rounded-2xl p-5 overflow-hidden group hover:shadow-md transition-shadow">
-        <div className={`absolute top-0 left-0 w-1 h-full rounded-l-2xl ${activeTab === 'orders' ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
+        <div className="-mx-5 -mt-5 mb-3 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
+          <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">{card4Label}</span>
+        </div>
         <div className="flex items-start justify-between">
           <div>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest block">
-              {card4Label}
-            </span>
-            <h3 className="text-xl font-black text-slate-900 mt-1.5 tracking-tight leading-tight">
+            <h3 className="text-xl font-black text-slate-900 tracking-tight leading-tight">
               {card4Value}
             </h3>
           </div>

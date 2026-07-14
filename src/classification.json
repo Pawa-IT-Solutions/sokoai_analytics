@@ -1,0 +1,261 @@
+[{
+  "centroid_id": "1",
+  "feature": "avg_order_value",
+  "categorical_value": [],
+  "numerical_value": "172696.6538254717"
+}, {
+  "centroid_id": "1",
+  "feature": "cancellation_rate",
+  "categorical_value": [],
+  "numerical_value": "0.048270440251572677"
+}, {
+  "centroid_id": "1",
+  "feature": "mpesa_usage_rate",
+  "categorical_value": [],
+  "numerical_value": "-3.3306690738754696e-16"
+}, {
+  "centroid_id": "1",
+  "feature": "primary_city",
+  "categorical_value": [{
+    "category": "Meru",
+    "value": "0.11320754716981132"
+  }, {
+    "category": "Nakuru",
+    "value": "0.075471698113207544"
+  }, {
+    "category": "Nairobi",
+    "value": "0.094339622641509441"
+  }, {
+    "category": "Eldoret",
+    "value": "0.13207547169811321"
+  }, {
+    "category": "Nyeri",
+    "value": "0.10377358490566038"
+  }, {
+    "category": "Machakos",
+    "value": "0.12264150943396226"
+  }, {
+    "category": "Kisumu",
+    "value": "0.10377358490566038"
+  }, {
+    "category": "Mombasa",
+    "value": "0.094339622641509441"
+  }, {
+    "category": "Thika",
+    "value": "0.084905660377358486"
+  }, {
+    "category": "Kakamega",
+    "value": "0.075471698113207544"
+  }],
+  "numerical_value": null
+}, {
+  "centroid_id": "1",
+  "feature": "total_items_purchased",
+  "categorical_value": [],
+  "numerical_value": "7.1698113207547189"
+}, {
+  "centroid_id": "1",
+  "feature": "total_orders",
+  "categorical_value": [],
+  "numerical_value": "1.1037735849056598"
+}, {
+  "centroid_id": "1",
+  "feature": "total_spend",
+  "categorical_value": [],
+  "numerical_value": "480000.88745283033"
+}, {
+  "centroid_id": "2",
+  "feature": "avg_order_value",
+  "categorical_value": [],
+  "numerical_value": "282885.7951427254"
+}, {
+  "centroid_id": "2",
+  "feature": "cancellation_rate",
+  "categorical_value": [],
+  "numerical_value": "0.016140350877193205"
+}, {
+  "centroid_id": "2",
+  "feature": "mpesa_usage_rate",
+  "categorical_value": [],
+  "numerical_value": "0.043379281537176045"
+}, {
+  "centroid_id": "2",
+  "feature": "primary_city",
+  "categorical_value": [{
+    "category": "Thika",
+    "value": "0.084210526315789472"
+  }, {
+    "category": "Eldoret",
+    "value": "0.084210526315789472"
+  }, {
+    "category": "Machakos",
+    "value": "0.10526315789473684"
+  }, {
+    "category": "Kisumu",
+    "value": "0.12631578947368421"
+  }, {
+    "category": "Mombasa",
+    "value": "0.084210526315789472"
+  }, {
+    "category": "Nyeri",
+    "value": "0.073684210526315783"
+  }, {
+    "category": "Nakuru",
+    "value": "0.094736842105263161"
+  }, {
+    "category": "Meru",
+    "value": "0.11578947368421053"
+  }, {
+    "category": "Nairobi",
+    "value": "0.1368421052631579"
+  }, {
+    "category": "Kakamega",
+    "value": "0.094736842105263161"
+  }],
+  "numerical_value": null
+}, {
+  "centroid_id": "2",
+  "feature": "total_items_purchased",
+  "categorical_value": [],
+  "numerical_value": "18.778947368421051"
+}, {
+  "centroid_id": "2",
+  "feature": "total_orders",
+  "categorical_value": [],
+  "numerical_value": "1.831578947368421"
+}, {
+  "centroid_id": "2",
+  "feature": "total_spend",
+  "categorical_value": [],
+  "numerical_value": "1516490.3727368424"
+}, {
+  "centroid_id": "3",
+  "feature": "avg_order_value",
+  "categorical_value": [],
+  "numerical_value": "223515.260341709"
+}, {
+  "centroid_id": "3",
+  "feature": "cancellation_rate",
+  "categorical_value": [],
+  "numerical_value": "0.64348296630905344"
+}, {
+  "centroid_id": "3",
+  "feature": "mpesa_usage_rate",
+  "categorical_value": [],
+  "numerical_value": "0.16087270217705"
+}, {
+  "centroid_id": "3",
+  "feature": "primary_city",
+  "categorical_value": [{
+    "category": "Kisumu",
+    "value": "0.14492753623188406"
+  }, {
+    "category": "Mombasa",
+    "value": "0.11594202898550725"
+  }, {
+    "category": "Nyeri",
+    "value": "0.072463768115942032"
+  }, {
+    "category": "Nakuru",
+    "value": "0.14492753623188406"
+  }, {
+    "category": "Nairobi",
+    "value": "0.10144927536231885"
+  }, {
+    "category": "Meru",
+    "value": "0.043478260869565216"
+  }, {
+    "category": "Thika",
+    "value": "0.086956521739130432"
+  }, {
+    "category": "Eldoret",
+    "value": "0.086956521739130432"
+  }, {
+    "category": "Machakos",
+    "value": "0.14492753623188406"
+  }, {
+    "category": "Kakamega",
+    "value": "0.057971014492753624"
+  }],
+  "numerical_value": null
+}, {
+  "centroid_id": "3",
+  "feature": "total_items_purchased",
+  "categorical_value": [],
+  "numerical_value": "19.782608695652176"
+}, {
+  "centroid_id": "3",
+  "feature": "total_orders",
+  "categorical_value": [],
+  "numerical_value": "2.2028985507246377"
+}, {
+  "centroid_id": "3",
+  "feature": "total_spend",
+  "categorical_value": [],
+  "numerical_value": "1431144.5873913043"
+}, {
+  "centroid_id": "4",
+  "feature": "avg_order_value",
+  "categorical_value": [],
+  "numerical_value": "213279.34186805555"
+}, {
+  "centroid_id": "4",
+  "feature": "cancellation_rate",
+  "categorical_value": [],
+  "numerical_value": "0.11458333333333327"
+}, {
+  "centroid_id": "4",
+  "feature": "mpesa_usage_rate",
+  "categorical_value": [],
+  "numerical_value": "0.95520833333333366"
+}, {
+  "centroid_id": "4",
+  "feature": "primary_city",
+  "categorical_value": [{
+    "category": "Kisumu",
+    "value": "0.10416666666666667"
+  }, {
+    "category": "Nyeri",
+    "value": "0.125"
+  }, {
+    "category": "Thika",
+    "value": "0.14583333333333334"
+  }, {
+    "category": "Nakuru",
+    "value": "0.10416666666666667"
+  }, {
+    "category": "Mombasa",
+    "value": "0.125"
+  }, {
+    "category": "Meru",
+    "value": "0.0625"
+  }, {
+    "category": "Eldoret",
+    "value": "0.125"
+  }, {
+    "category": "Nairobi",
+    "value": "0.10416666666666667"
+  }, {
+    "category": "Kakamega",
+    "value": "0.0625"
+  }, {
+    "category": "Machakos",
+    "value": "0.041666666666666664"
+  }],
+  "numerical_value": null
+}, {
+  "centroid_id": "4",
+  "feature": "total_items_purchased",
+  "categorical_value": [],
+  "numerical_value": "9.6666666666666643"
+}, {
+  "centroid_id": "4",
+  "feature": "total_orders",
+  "categorical_value": [],
+  "numerical_value": "1.1875"
+}, {
+  "centroid_id": "4",
+  "feature": "total_spend",
+  "categorical_value": [],
+  "numerical_value": "688959.130625"
+}]

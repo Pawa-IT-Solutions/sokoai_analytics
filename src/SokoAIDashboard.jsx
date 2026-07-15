@@ -6,6 +6,7 @@ import { OrderDetailsView } from './components/dashboard/views/OrderDetailsView'
 import { CustomerSegmentsView } from './components/dashboard/views/CustomerSegmentsView';
 import { FutureBuyerPredictorView } from './components/dashboard/views/FutureBuyerPredictorView';
 import { useDashboardData } from './hooks/useDashboardData';
+import { useSegmentAICopy } from './hooks/useSegmentAICopy';
 
 export default function SokoAIDashboard() {
     const [activeTab, setActiveTab] = useState('orders');
@@ -48,6 +49,15 @@ export default function SokoAIDashboard() {
         totalCustomers, totalRevenue, totalOrders, avgOrderValue,
         categoryData, paymentData, statusData, topProductsData, revenueByCategoryDate,
     } = useDashboardData();
+
+    const {
+        displaySegments,
+        isLoadingAI,
+        isRefreshingAI,
+        aiError,
+        lastGeneratedAt,
+        loadAICopy,
+    } = useSegmentAICopy();
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 flex font-sans antialiased">
@@ -101,6 +111,7 @@ export default function SokoAIDashboard() {
                         totalRevenue={totalRevenue}
                         totalOrders={totalOrders}
                         avgOrderValue={avgOrderValue}
+                        model2Segments={displaySegments}
                     />
 
                     {actionNotify && (
@@ -117,6 +128,12 @@ export default function SokoAIDashboard() {
                         <CustomerSegmentsView
                             selectedSegment={selectedSegment}
                             setSelectedSegment={setSelectedSegment}
+                            displaySegments={displaySegments}
+                            isLoadingAI={isLoadingAI}
+                            isRefreshingAI={isRefreshingAI}
+                            aiError={aiError}
+                            lastGeneratedAt={lastGeneratedAt}
+                            onRefreshAICopy={() => loadAICopy(true)}
                         />
                     )}
 

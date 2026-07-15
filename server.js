@@ -3,14 +3,21 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BigQuery } from '@google-cloud/bigquery';
+import { VertexAI, HarmBlockThreshold, HarmCategory } from '@google-cloud/vertexai';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DIST_DIR = path.join(__dirname, 'dist');
 const INDEX_FILE = path.join(DIST_DIR, 'index.html');
-const PORT = Number(process.env.PORT || 8080);
+const env = globalThis.process?.env ?? {};
+const PORT = Number(env.PORT || 8080);
+const PROJECT_ID = env.GOOGLE_CLOUD_PROJECT || 'pawait-data-hub';
+const VERTEX_LOCATION = env.VERTEX_LOCATION || 'us-central1';
+const VERTEX_AI_MODEL_NAME = env.VERTEX_AI_MODEL_NAME || 'gemini-2.5-flash';
+const MAX_VERTEX_RETRIES = 3;
 
 const client = new BigQuery();
+const vertexAI = new VertexAI({ project: PROJECT_ID, location: VERTEX_LOCATION });
 const CACHE_TTL_MS = 60 * 1000;
 const predictionsCache = new Map();
 
@@ -295,6 +302,228 @@ async function handlePredictions(reqUrl, res) {
     }
 }
 
+function toNumberOrNull(value) {
+    if (value === null || value === undefined) {
+        return null;
+    }
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+}
+
+function normalizeSegmentationRows(rows) {
+    const byCentroid = new Map();
+
+    for (const row of rows) {
+        const centroidId = Number(row.centroid_id);
+        if (!Number.isFinite(centroidId)) {
+            continue;
+        }
+
+        if (!byCentroid.has(centroidId)) {
+            byCentroid.set(centroidId, {
+                centroid_id: centroidId,
+                features: {},
+            });
+        }
+
+        const centroid = byCentroid.get(centroidId);
+        const featureName = String(row.feature ?? '').trim();
+        if (!featureName) {
+            continue;
+        }
+
+        if (!centroid.features[featureName]) {
+            centroid.features[featureName] = {
+                numerical_value: null,
+                categorical_values: [],
+            };
+        }
+
+        const feature = centroid.features[featureName];
+        const numericalValue = toNumberOrNull(row.numerical_value);
+        if (numericalValue !== null) {
+            feature.numerical_value = numericalValue;
+        }
+
+        const categoryFromStruct = row.categorical_value?.category;
+        const valueFromStruct = row.categorical_value?.value;
+        const category = categoryFromStruct ?? row.category ?? null;
+        const value = toNumberOrNull(valueFromStruct ?? row.value ?? null);
+
+        if (category && value !== null) {
+            feature.categorical_values.push({
+                category: String(category),
+                value,
+            });
+        }
+    }
+
+    return [...byCentroid.values()]
+        .sort((a, b) => a.centroid_id - b.centroid_id)
+        .map((centroid) => {
+            const features = Object.entries(centroid.features)
+                .map(([feature, values]) => ({
+                    feature,
+                    numerical_value: values.numerical_value,
+                    categorical_values: [...values.categorical_values].sort((a, b) => b.value - a.value),
+                }))
+                .sort((a, b) => a.feature.localeCompare(b.feature));
+
+            return {
+                centroid_id: centroid.centroid_id,
+                features,
+            };
+        });
+}
+
+function buildSegmentPrompt(centroids) {
+    return [
+        'You are an ecommerce analytics strategist for SokoAI.',
+        'Task: Use the centroid metrics below to create concise customer segment narratives and recommended actions.',
+        'Constraints:',
+        '- Keep language business-ready and concise.',
+        '- Ground every claim in provided metrics only.',
+        '- Output valid JSON only.',
+        '- Keep each narrative to 2-3 sentences max.',
+        '- Provide exactly 3 actionable recommendations per segment.',
+        '- Provide dashboard-ready copy labels.',
+        '',
+        'Return this exact JSON schema:',
+        '{',
+        '  "segments": [',
+        '    {',
+        '      "centroid_id": 1,',
+        '      "segment_name": "string",',
+        '      "segment_tagline": "string",',
+        '      "narrative": "string",',
+        '      "recommended_actions": ["string", "string", "string"],',
+        '      "ui_labels": {',
+        '        "risk_level": "Low|Medium|High",',
+        '        "value_tier": "Low|Medium|High",',
+        '        "primary_channel_label": "string"',
+        '      }',
+        '    }',
+        '  ]',
+        '}',
+        '',
+        'Centroid input JSON:',
+        JSON.stringify(centroids),
+    ].join('\n');
+}
+
+function parseVertexJsonResponse(result) {
+    const text = result?.response?.candidates?.[0]?.content?.parts
+        ?.map((part) => part.text ?? '')
+        .join('')
+        .trim();
+
+    if (!text) {
+        throw new Error('Vertex AI returned an empty response');
+    }
+
+    let parsed;
+    try {
+        parsed = JSON.parse(text);
+    } catch {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            throw new Error('Vertex AI did not return valid JSON');
+        }
+        parsed = JSON.parse(jsonMatch[0]);
+    }
+
+    if (!Array.isArray(parsed?.segments)) {
+        throw new Error('Vertex AI response missing segments array');
+    }
+
+    return parsed;
+}
+
+async function generateSegmentNarratives(centroids) {
+    const model = vertexAI.getGenerativeModel({
+        model: VERTEX_AI_MODEL_NAME,
+        safetySettings: [
+            { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        ],
+        generationConfig: {
+            temperature: 0.3,
+            topP: 1.0,
+            topK: 40,
+            maxOutputTokens: 4096,
+            responseMimeType: 'application/json',
+        },
+    });
+
+    const prompt = buildSegmentPrompt(centroids);
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= MAX_VERTEX_RETRIES; attempt += 1) {
+        try {
+            const result = await model.generateContent({
+                contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            });
+            return parseVertexJsonResponse(result);
+        } catch (error) {
+            lastError = error;
+            if (attempt < MAX_VERTEX_RETRIES) {
+                await new Promise((resolve) => setTimeout(resolve, attempt * 400));
+            }
+        }
+    }
+
+    throw new Error(lastError?.message ?? 'Unknown Vertex AI error');
+}
+
+async function handleSegmentAICopy(reqUrl, res) {
+    try {
+        const parsedUrl = new URL(reqUrl ?? '/', 'http://localhost');
+        const forceRefresh = parsedUrl.searchParams.get('refresh') === '1';
+        const cacheKey = 'segment-ai-copy';
+
+        if (!forceRefresh) {
+            const cached = getCache(cacheKey);
+            if (cached) {
+                sendJson(res, 200, { ...cached, cache: 'hit' });
+                return;
+            }
+        }
+
+        const query = `
+      SELECT
+        centroid_id,
+        feature,
+        categorical_value,
+        numerical_value
+      FROM \`pawait-data-hub.cloud_mastery.customer_segmentation\`
+      ORDER BY centroid_id, feature
+    `;
+
+        const [rows] = await client.query({ query, useLegacySql: false });
+        const centroids = normalizeSegmentationRows(rows);
+        const aiResult = await generateSegmentNarratives(centroids);
+        const result = {
+            generatedAt: new Date().toISOString(),
+            model: VERTEX_AI_MODEL_NAME,
+            segments: aiResult.segments,
+            source: {
+                table: 'pawait-data-hub.cloud_mastery.customer_segmentation',
+                centroidCount: centroids.length,
+            },
+        };
+
+        setCache(cacheKey, result);
+        sendJson(res, 200, { ...result, cache: forceRefresh ? 'refresh' : 'miss' });
+    } catch (error) {
+        sendJson(res, 500, {
+            error: 'Failed to generate segment AI copy',
+            details: error?.message ?? 'Unknown error',
+        });
+    }
+}
+
 async function handleStatic(reqUrl, res) {
     const parsedUrl = new URL(reqUrl ?? '/', 'http://localhost');
     const pathname = decodeURIComponent(parsedUrl.pathname || '/');
@@ -348,10 +577,18 @@ const server = createServer(async (req, res) => {
         return;
     }
 
+    if (pathname === '/api/segment-ai-copy') {
+        if (method !== 'GET') {
+            sendJson(res, 405, { error: 'Method not allowed' });
+            return;
+        }
+        await handleSegmentAICopy(reqUrl, res);
+        return;
+    }
+
     await handleStatic(reqUrl, res);
 });
 
 server.listen(PORT, () => {
-    // eslint-disable-next-line no-console
     console.log(`SokoAI server listening on port ${PORT}`);
 });

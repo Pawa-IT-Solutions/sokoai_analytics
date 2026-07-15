@@ -1,19 +1,23 @@
 import React from 'react';
 import { MODEL_2_SEGMENTS } from '../../data/segments';
 
-export function KPIRow({ activeTab, totalCustomers, totalRevenue, totalOrders, avgOrderValue }) {
+export function KPIRow({ activeTab, totalCustomers, totalRevenue, totalOrders, avgOrderValue, model2Segments = MODEL_2_SEGMENTS }) {
   const formatCurrency = (val) => "KES " + Number(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const parsePercent = (value) => Number(String(value).replace('%', ''));
   const parseKES = (value) => Number(String(value).replace('KES', '').replace(/,/g, '').trim());
 
-  const highestRiskSegment = MODEL_2_SEGMENTS.reduce((max, segment) => (
-    parsePercent(segment.cancellation) > parsePercent(max.cancellation) ? segment : max
-  ), MODEL_2_SEGMENTS[0]);
+  const segmentSource = Array.isArray(model2Segments) && model2Segments.length > 0
+    ? model2Segments
+    : MODEL_2_SEGMENTS;
 
-  const topValueSegment = MODEL_2_SEGMENTS.reduce((max, segment) => (
+  const highestRiskSegment = segmentSource.reduce((max, segment) => (
+    parsePercent(segment.cancellation) > parsePercent(max.cancellation) ? segment : max
+  ), segmentSource[0]);
+
+  const topValueSegment = segmentSource.reduce((max, segment) => (
     parseKES(segment.totalSpend) > parseKES(max.totalSpend) ? segment : max
-  ), MODEL_2_SEGMENTS[0]);
+  ), segmentSource[0]);
 
   // DYNAMIC KPI CARD RENDERING
   const kpiSpendLabel = activeTab === 'orders' ? 'Total Revenue' : activeTab === 'model2' ? 'Top Value Segment' : 'Avg spend (VIP Centroid)';

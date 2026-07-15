@@ -12,12 +12,6 @@ export function CustomerSegmentsView({
   onRefreshAICopy,
 }) {
   const currentSegment = displaySegments.find(s => s.id === selectedSegment) || displaySegments[0];
-  const playbookItems = currentSegment?.action
-    ? currentSegment.action
-      .split(/\s*\d+\.\s+/)
-      .map((item) => item.trim())
-      .filter(Boolean)
-    : [];
   const panelRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -224,15 +218,7 @@ export function CustomerSegmentsView({
                 <span className="text-emerald-600">⚡</span>
                 <h4 className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Automated Operational Playbook</h4>
               </div>
-              {playbookItems.length > 0 ? (
-                <ul className="list-disc list-inside space-y-1.5 text-sm text-slate-700">
-                  {playbookItems.map((item, index) => (
-                    <li key={`${currentSegment.id}-playbook-${index}`}>{item}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-slate-700">{currentSegment.action}</p>
-              )}
+              <p className="text-sm text-slate-700">{currentSegment.action}</p>
             </div>
           </div>
         </div>

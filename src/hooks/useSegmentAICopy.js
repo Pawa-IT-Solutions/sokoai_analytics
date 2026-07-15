@@ -16,6 +16,14 @@ function mapSegments(baseSegments, aiSegments) {
             return { ...segment, aiTagline: '', aiLabels: null };
         }
 
+        const behavioralProfile = typeof ai.behavioral_profile === 'string' && ai.behavioral_profile.trim()
+            ? ai.behavioral_profile.trim()
+            : ai.narrative;
+
+        const operationalPlaybook = typeof ai.operational_playbook === 'string' && ai.operational_playbook.trim()
+            ? ai.operational_playbook.trim()
+            : null;
+
         const actions = Array.isArray(ai.recommended_actions)
             ? ai.recommended_actions.filter((item) => typeof item === 'string' && item.trim())
             : [];
@@ -23,10 +31,10 @@ function mapSegments(baseSegments, aiSegments) {
         return {
             ...segment,
             name: ai.segment_name || segment.name,
-            profile: ai.narrative || segment.profile,
-            action: actions.length > 0
+            profile: behavioralProfile || segment.profile,
+            action: operationalPlaybook || (actions.length > 0
                 ? actions.map((item, index) => `${index + 1}. ${item}`).join(' ')
-                : segment.action,
+                : segment.action),
             aiTagline: ai.segment_tagline || '',
             aiLabels: ai.ui_labels ?? null,
         };

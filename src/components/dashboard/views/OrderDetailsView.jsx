@@ -1,4 +1,16 @@
 import React, { useMemo } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 const CHART_COLORS = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#a855f7', '#ec4899', '#14b8a6'];
 const STATUS_COLORS = { delivered: '#10b981', confirmed: '#0ea5e9', shipped: '#6366f1', pending: '#f59e0b', cancelled: '#ef4444' };
@@ -253,77 +265,153 @@ export function OrderDetailsView({
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-          {/* Card 5: Revenue Over Time — broken down by category */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:col-span-2 flex flex-col gap-3">
+          {/* Card 5: Revenue Trends (two charts) */}
+          <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm lg:col-span-2 flex flex-col gap-4">
             <div className="-mx-5 -mt-5 mb-1 px-5 py-3 rounded-t-2xl bg-slate-800 border-b border-slate-700 flex items-center justify-between">
-              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Revenue Over Time by Payment Method</span>
+              <span className="text-white text-[11px] font-extrabold uppercase tracking-[0.12em]">Revenue Trends</span>
               <span className="text-xs text-slate-300 font-semibold">{revenueByCategoryDate.allDates.length} days</span>
             </div>
+
             {revenueByCategoryDate.allDates.length < 2 || revenueByCategoryDate.lines.length === 0 ? (
               <div className="flex-1 flex items-center justify-center text-slate-300 text-sm py-10">
                 Not enough date range data to plot
               </div>
             ) : (() => {
               const { lines, allDates } = revenueByCategoryDate;
-              const W = 500, H = 130, PAD_X = 8, PAD_Y = 10;
-              const allRevValues = lines.flatMap(l => l.points.map(([, v]) => v));
-              const maxRev = Math.max(...allRevValues, 1);
+              const totalSeries = allDates.map((date, idx) => {
+                const total = lines.reduce((sum, line) => sum + Number(line.points?.[idx]?.[1] ?? 0), 0);
+                return [date, total];
+              });
 
-              const toPath = (points) => {
-                const coords = points.map(([, v], i) => ({
-                  x: PAD_X + (i / (allDates.length - 1)) * (W - PAD_X * 2),
-                  y: H - PAD_Y - ((v / maxRev) * (H - PAD_Y * 2)),
-                }));
-                return coords.map((p, i) => {
-                  if (i === 0) return `M${p.x.toFixed(1)},${p.y.toFixed(1)}`;
-                  const prev = coords[i - 1];
-                  const cpx = ((prev.x + p.x) / 2).toFixed(1);
-                  return `C${cpx},${prev.y.toFixed(1)} ${cpx},${p.y.toFixed(1)} ${p.x.toFixed(1)},${p.y.toFixed(1)}`;
-                }).join(' ');
+              const methodTotals = lines
+                .map((line) => ({
+                  name: line.category,
+                  value: line.points.reduce((sum, [, v]) => sum + Number(v ?? 0), 0),
+                }))
+                .sort((a, b) => b.value - a.value);
+
+              const maxTotal = Math.max(1, ...totalSeries.map(([, v]) => Number(v ?? 0)));
+              const maxMethod = Math.max(1, ...methodTotals.map((m) => m.value));
+              const firstTotal = Number(totalSeries[0]?.[1] ?? 0);
+              const lastTotal = Number(totalSeries[totalSeries.length - 1]?.[1] ?? 0);
+              const trendPct = firstTotal === 0 ? 0 : ((lastTotal - firstTotal) / firstTotal) * 100;
+              const isTrendUp = trendPct >= 0;
+
+              const totalRevenueData = totalSeries.map(([date, revenue]) => ({
+                date,
+                revenue: Number(revenue ?? 0),
+              }));
+
+              const paymentRevenueData = methodTotals.map((item) => ({
+                method: item.name,
+                revenue: Number(item.value ?? 0),
+              }));
+
+              const renderChartTooltip = ({ active, payload, label }) => {
+                if (!active || !payload?.length) return null;
+                return (
+                  <div className="rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-lg shadow-slate-900/10">
+                    <p className="mb-1 text-xs font-medium text-[#64748B]">{label}</p>
+                    <p className="text-sm font-semibold text-slate-900">{formatCurrency(payload[0].value)}</p>
+                  </div>
+                );
               };
 
               return (
-                <>
-                  <div className="relative h-36">
-                    <svg className="w-full h-full" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-                      {/* Grid lines */}
-                      {[0.25, 0.5, 0.75, 1].map(f => (
-                        <line key={f}
-                          x1={PAD_X} y1={H - PAD_Y - f * (H - PAD_Y * 2)}
-                          x2={W - PAD_X} y2={H - PAD_Y - f * (H - PAD_Y * 2)}
-                          stroke="#f1f5f9" strokeWidth="1"
-                        />
-                      ))}
-                      {/* One line per category */}
-                      {lines.map((line, i) => (
-                        <path
-                          key={line.category}
-                          d={toPath(line.points)}
-                          fill="none"
-                          stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                          strokeWidth="1"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      ))}
-                    </svg>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 shadow-[inset_0_1px_0_#ffffff]">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-xs font-black uppercase tracking-wider text-[#64748B]">Total Revenue Over Time</div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${isTrendUp ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-[#DC2626] bg-[#FEF2F2] border-[#DC2626]/20'}`}>
+                        {isTrendUp ? '▲' : '▼'} {Math.abs(trendPct).toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={totalRevenueData} margin={{ top: 8, right: 4, left: 10, bottom: 16 }}>
+                          <defs>
+                            <linearGradient id="trendAreaFill" x1="0" x2="0" y1="0" y2="1">
+                              <stop offset="0%" stopColor="#2563EB" stopOpacity={0.10} />
+                              <stop offset="100%" stopColor="#2563EB" stopOpacity={0.01} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid vertical={false} stroke="#E2E8F0" strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="date"
+                            axisLine={false}
+                            tickLine={false}
+                            interval="preserveStartEnd"
+                            tick={{ fill: '#64748B', fontSize: 10 }}
+                            tickFormatter={(value) => {
+                              const d = new Date(value);
+                              if (Number.isNaN(d.getTime())) return value;
+                              return `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+                            }}
+                            angle={-32}
+                            textAnchor="end"
+                            tickMargin={10}
+                            height={46}
+                          />
+                          <YAxis
+                            domain={[0, maxTotal * 1.08]}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#64748B', fontSize: 10 }}
+                            tickFormatter={(value) => formatK(value)}
+                            width={36}
+                          />
+                          <Tooltip content={renderChartTooltip} cursor={{ stroke: '#93c5fd', strokeWidth: 1 }} />
+                          <Area
+                            type="monotone"
+                            dataKey="revenue"
+                            stroke="#2563EB"
+                            strokeWidth={1}
+                            fill="url(#trendAreaFill)"
+                            activeDot={{ r: 3, fill: '#2563EB', stroke: '#fff', strokeWidth: 1.5 }}
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-[#64748B] font-semibold mt-1">
+                      <span>{allDates[0]}</span>
+                      <span>{allDates[allDates.length - 1]}</span>
+                    </div>
                   </div>
-                  {/* X-axis labels */}
-                  <div className="flex justify-between text-xs text-slate-400 font-bold border-t border-slate-100 pt-2">
-                    <span>{allDates[0]}</span>
-                    {allDates.length > 2 && <span>{allDates[Math.floor(allDates.length / 2)]}</span>}
-                    <span>{allDates[allDates.length - 1]}</span>
+
+                  <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl p-3.5 shadow-[inset_0_1px_0_#ffffff]">
+                    <div className="text-xs font-black uppercase tracking-wider text-[#64748B] mb-2">Revenue By Payment Method</div>
+                    <div className="h-44">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={paymentRevenueData} margin={{ top: 8, right: 4, left: 10, bottom: 0 }} barCategoryGap="30%">
+                          <CartesianGrid vertical={false} stroke="#E2E8F0" strokeDasharray="3 3" />
+                          <XAxis
+                            dataKey="method"
+                            axisLine={false}
+                            tickLine={false}
+                            interval={0}
+                            tick={{ fill: '#64748B', fontSize: 11 }}
+                            tickFormatter={(value) => String(value).replace(/_/g, '').slice(0, 6).toUpperCase()}
+                            dy={10}
+                          />
+                          <YAxis
+                            domain={[0, maxMethod * 1.12]}
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#64748B', fontSize: 10 }}
+                            tickFormatter={(value) => formatK(value)}
+                            width={36}
+                          />
+                          <Tooltip content={renderChartTooltip} cursor={{ fill: '#f8fafc' }} />
+                          <Bar dataKey="revenue" radius={[7, 7, 2, 2]}>
+                            {paymentRevenueData.map((entry, idx) => (
+                              <Cell key={entry.method} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
-                  {/* Category legend */}
-                  <div className="flex flex-wrap gap-x-3 gap-y-1 pt-1 border-t border-slate-100">
-                    {lines.map((line, i) => (
-                      <div key={line.category} className="flex items-center gap-1">
-                        <span className="w-2.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}></span>
-                        <span className="text-xs text-slate-500 font-semibold">{line.category}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
+                </div>
               );
             })()}
           </div>
@@ -345,7 +433,8 @@ export function OrderDetailsView({
                       <span className="text-xs font-black text-slate-900 flex-shrink-0">{formatK(rev)}</span>
                     </div>
                     <div className="bg-slate-100 rounded-full h-2 overflow-hidden">
-                      <div className="h-full rounded-full transition-all duration-500"
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${(rev / topProductMax) * 100}%`, backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }}
                       />
                     </div>
@@ -451,8 +540,8 @@ export function OrderDetailsView({
             </div>
           )}
         </div>
-      </div>
+      </div >
 
-    </div>
+    </div >
   );
 }

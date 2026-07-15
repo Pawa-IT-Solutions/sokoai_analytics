@@ -24,15 +24,15 @@ export function Header({
 
       {/* Right: Filters (only on orders tab) */}
       {activeTab === 'orders' && (
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-3">
 
           {/* Category */}
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Category</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Category</label>
             <select
               value={filterCategory}
               onChange={e => setFilterCategory(e.target.value)}
-              className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[120px]"
+              className="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[150px]"
             >
               <option value="">All Categories</option>
               {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
@@ -41,11 +41,11 @@ export function Header({
 
           {/* Status */}
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Status</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Status</label>
             <select
               value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
-              className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[110px]"
+              className="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[140px]"
             >
               <option value="">All Statuses</option>
               {uniqueStatuses.map(s => <option key={s} value={s}>{s}</option>)}
@@ -54,11 +54,11 @@ export function Header({
 
           {/* Payment */}
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Payment</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payment</label>
             <select
               value={filterPayment}
               onChange={e => setFilterPayment(e.target.value)}
-              className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[120px]"
+              className="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[150px]"
             >
               <option value="">All Methods</option>
               {uniquePayments.map(p => <option key={p} value={p}>{p}</option>)}
@@ -67,23 +67,23 @@ export function Header({
 
           {/* Date From */}
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">From</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">From</label>
             <input
               type="date"
               value={filterDateFrom}
               onChange={e => setFilterDateFrom(e.target.value)}
-              className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+              className="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[160px]"
             />
           </div>
 
           {/* Date To */}
           <div className="flex flex-col gap-1">
-            <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">To</label>
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">To</label>
             <input
               type="date"
               value={filterDateTo}
               onChange={e => setFilterDateTo(e.target.value)}
-              className="border border-slate-200 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition"
+              className="border border-slate-200 rounded-lg px-3.5 py-2 text-[13px] text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition min-w-[160px]"
             />
           </div>
 
@@ -92,15 +92,15 @@ export function Header({
             {hasActiveFilters ? (
               <button
                 onClick={clearFilters}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-[11px] font-bold hover:bg-rose-100 transition"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-[12px] font-bold hover:bg-rose-100 transition"
               >
                 ✕ Clear
               </button>
             ) : (
-              <span className="text-[10px] text-slate-300 font-medium pb-1">No filters</span>
+              <span className="text-[11px] text-slate-300 font-medium pb-1">No filters</span>
             )}
             {hasActiveFilters && (
-              <span className="text-[9px] font-bold text-indigo-500">{filteredOrdersLength} rows</span>
+              <span className="text-[10px] font-bold text-indigo-500">{filteredOrdersLength} rows</span>
             )}
           </div>
 

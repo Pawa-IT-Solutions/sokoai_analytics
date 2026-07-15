@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Retargeting candidates</title>
+</head>
+
+<body style="margin:0; padding:0; background:#F8FAFC; color:#0F172A; font-family:Arial, Helvetica, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+        style="background:#F8FAFC; padding:28px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                    style="max-width:700px; background:#FFFFFF; border:1px solid #E2E8F0; border-radius:16px; overflow:hidden;">
+                    <tr>
+                        <td
+                            style="padding:18px 28px; background:#0F172A; border-bottom:1px solid #1E293B; color:#FFFFFF;">
+                            <div
+                                style="font-size:11px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; opacity:.9;">
+                                PAWAIT • GROWTH INTELLIGENCE</div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:24px 28px 10px;">
+                            <h1 style="margin:0; font-size:28px; line-height:1.2; color:#0F172A;">Retargeting candidates
+                            </h1>
+                            <p style="margin:10px 0 0; font-size:14px; line-height:1.6; color:#64748B;">
+                                A ranked audience of new visitors with the strongest predicted likelihood of returning
+                                to purchase.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:14px 28px 8px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td width="50%" style="padding-right:8px; vertical-align:top;">
+                                        <div
+                                            style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden;">
+                                            <div
+                                                style="background:#0F172A; color:#FFFFFF; padding:9px 12px; font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase;">
+                                                Qualified sessions
+                                            </div>
+                                            <div
+                                                style="padding:14px 12px 16px; font-size:28px; line-height:1; font-weight:800; color:#0F172A;">
+                                                {{candidate_count}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td width="50%" style="padding-left:8px; vertical-align:top;">
+                                        <div
+                                            style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden;">
+                                            <div
+                                                style="background:#0F172A; color:#FFFFFF; padding:9px 12px; font-size:11px; font-weight:800; letter-spacing:1.1px; text-transform:uppercase;">
+                                                Probability threshold
+                                            </div>
+                                            <div
+                                                style="padding:14px 12px 16px; font-size:28px; line-height:1; font-weight:800; color:#2563EB;">
+                                                {{threshold}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:20px 28px 6px;">
+                            <h2 style="margin:0; font-size:17px; color:#0F172A;">Top candidates</h2>
+                            <p style="margin:8px 0 14px; font-size:13px; line-height:1.6; color:#64748B;">
+                                Prioritize these visitors for retargeting. The attached CSV includes the full ranked
+                                audience.
+                            </p>
+                            <div style="overflow-x:auto; border:1px solid #E2E8F0; border-radius:12px;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0"
+                                    style="border-collapse:collapse; font-size:13px; background:#FFFFFF;">
+                                    <thead>
+                                        <tr style="background:#F8FAFC; color:#64748B; text-align:left;">
+                                            <th
+                                                style="padding:11px 10px; border-bottom:1px solid #E2E8F0; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;">
+                                                Session</th>
+                                            <th
+                                                style="padding:11px 10px; border-bottom:1px solid #E2E8F0; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;">
+                                                Probability</th>
+                                            <th
+                                                style="padding:11px 10px; border-bottom:1px solid #E2E8F0; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;">
+                                                Pages</th>
+                                            <th
+                                                style="padding:11px 10px; border-bottom:1px solid #E2E8F0; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;">
+                                                Source</th>
+                                            <th
+                                                style="padding:11px 10px; border-bottom:1px solid #E2E8F0; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase;">
+                                                Country</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="color:#1E293B;">{{candidate_rows}}</tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:24px 28px 28px;">
+                            <div
+                                style="border-left:4px solid #2563EB; padding:10px 14px; background:#F8FAFC; border:1px solid #E2E8F0; font-size:12px; line-height:1.6; color:#64748B;">
+                                This list is a model-based prioritization aid. Use the probability score alongside
+                                campaign budget, consent, and channel-eligibility rules.
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td
+                            style="padding:14px 28px; background:#F8FAFC; border-top:1px solid #E2E8F0; color:#64748B; font-size:11px; line-height:1.5;">
+                            Automated retargeting report • Pawait Data Hub
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

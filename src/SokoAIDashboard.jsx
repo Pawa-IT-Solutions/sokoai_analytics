@@ -13,7 +13,7 @@ export default function SokoAIDashboard() {
     const [selectedSegment, setSelectedSegment] = useState(1);
     const [actionNotify, setActionNotify] = useState('');
     const [isSendingReport, setIsSendingReport] = useState(false);
-    const isReportTriggerEnabled = false;
+    const isReportTriggerEnabled = true;
 
     const handleTriggerReport = async () => {
         if (isSendingReport) return;

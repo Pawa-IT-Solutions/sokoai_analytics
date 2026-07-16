@@ -39,18 +39,7 @@ export function Sidebar({ activeTab, setActiveTab }) {
               <span>🧪</span> Run Predictions
             </button>
 
-            {/* Tab 3: Customer Segments */}
-            <button
-              onClick={() => setActiveTab('model2')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model2'
-                ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
-                }`}
-            >
-              <span>👥</span> Customer Segments
-            </button>
-
-            {/* Tab 4: Predictions Report */}
+            {/* Tab 3: Predictions Report */}
             <button
               onClick={() => setActiveTab('model1')}
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model1'
@@ -59,6 +48,17 @@ export function Sidebar({ activeTab, setActiveTab }) {
                 }`}
             >
               <span>🎯</span> Predictions Report
+            </button>
+
+            {/* Tab 4: Customer Segments */}
+            <button
+              onClick={() => setActiveTab('model2')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model2'
+                ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
+                }`}
+            >
+              <span>👥</span> Customer Segments
             </button>
           </nav>
         </div>

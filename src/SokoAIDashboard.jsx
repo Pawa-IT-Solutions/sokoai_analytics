@@ -5,6 +5,7 @@ import { KPIRow } from './components/dashboard/KPIRow';
 import { OrderDetailsView } from './components/dashboard/views/OrderDetailsView';
 import { CustomerSegmentsView } from './components/dashboard/views/CustomerSegmentsView';
 import { FutureBuyerPredictorView } from './components/dashboard/views/FutureBuyerPredictorView';
+import { TestbedPredictorView } from './components/dashboard/views/TestbedPredictorView';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useSegmentAICopy } from './hooks/useSegmentAICopy';
 
@@ -105,14 +106,16 @@ export default function SokoAIDashboard() {
                         </div>
                     )}
 
-                    <KPIRow
-                        activeTab={activeTab}
-                        totalCustomers={totalCustomers}
-                        totalRevenue={totalRevenue}
-                        totalOrders={totalOrders}
-                        avgOrderValue={avgOrderValue}
-                        model2Segments={displaySegments}
-                    />
+                    {activeTab !== 'testbed' && (
+                        <KPIRow
+                            activeTab={activeTab}
+                            totalCustomers={totalCustomers}
+                            totalRevenue={totalRevenue}
+                            totalOrders={totalOrders}
+                            avgOrderValue={avgOrderValue}
+                            model2Segments={displaySegments}
+                        />
+                    )}
 
                     {actionNotify && (
                         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-sm shadow-sm animate-pulse">
@@ -122,6 +125,10 @@ export default function SokoAIDashboard() {
 
                     {activeTab === 'model1' && (
                         <FutureBuyerPredictorView setActionNotify={setActionNotify} showHeader={false} />
+                    )}
+
+                    {activeTab === 'testbed' && (
+                        <TestbedPredictorView />
                     )}
 
                     {activeTab === 'model2' && (

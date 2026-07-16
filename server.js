@@ -14,6 +14,8 @@ const PORT = Number(env.PORT || 8080);
 const PROJECT_ID = env.GOOGLE_CLOUD_PROJECT || 'pawait-data-hub';
 const VERTEX_LOCATION = env.VERTEX_LOCATION || 'us-central1';
 const VERTEX_AI_MODEL_NAME = env.VERTEX_AI_MODEL_NAME || 'gemini-2.5-flash';
+const TESTBED_MODEL = env.TESTBED_MODEL || 'pawait-data-hub.cloud_mastery.classification_model_2';
+const TESTBED_SOURCE_TABLE = env.TESTBED_SOURCE_TABLE || 'pawait-data-hub.cloud_mastery.predictions';
 const MAX_VERTEX_RETRIES = 3;
 
 const client = new BigQuery();
@@ -302,6 +304,100 @@ async function handlePredictions(reqUrl, res) {
     }
 }
 
+async function handleTestbedPrediction(reqUrl, res) {
+    try {
+        const parsedUrl = new URL(reqUrl ?? '/', 'http://localhost');
+        const sessionId = (parsedUrl.searchParams.get('sessionId') ?? '').trim();
+
+        if (!sessionId) {
+            sendJson(res, 400, { error: 'sessionId is required' });
+            return;
+        }
+
+        const query = `
+            SELECT
+                CAST(unique_session_id AS STRING) AS unique_session_id,
+                CAST(predicted_will_buy_on_return_visit AS STRING) AS predicted_label,
+                (
+                    SELECT SAFE_CAST(p.prob AS FLOAT64)
+                    FROM UNNEST(predicted_will_buy_on_return_visit_probs) p
+                    WHERE SAFE_CAST(p.label AS STRING) = '1'
+                    LIMIT 1
+                ) AS purchase_probability,
+                latest_ecommerce_progress,
+                bounces,
+                time_on_site,
+                pageviews,
+                source,
+                medium,
+                channelGrouping,
+                deviceCategory,
+                country
+            FROM ML.PREDICT(
+                MODEL \`${TESTBED_MODEL}\`,
+                (
+                    SELECT
+                        CAST(unique_session_id AS STRING) AS unique_session_id,
+                        latest_ecommerce_progress,
+                        bounces,
+                        time_on_site,
+                        pageviews,
+                        source,
+                        medium,
+                        channelGrouping,
+                        deviceCategory,
+                        country
+                    FROM \`${TESTBED_SOURCE_TABLE}\`
+                    WHERE CAST(unique_session_id AS STRING) = @sessionId
+                    LIMIT 1
+                )
+            )
+        `;
+
+        const [rows] = await client.query({
+            query,
+            params: { sessionId },
+            useLegacySql: false,
+        });
+
+        if (!rows.length) {
+            sendJson(res, 404, {
+                error: 'No matching session found in source table',
+                sessionId,
+                sourceTable: TESTBED_SOURCE_TABLE,
+            });
+            return;
+        }
+
+        const row = rows[0];
+        const prob = Number(row.purchase_probability ?? 0);
+        sendJson(res, 200, {
+            sessionId: row.unique_session_id ?? sessionId,
+            willPurchaseNextVisit: String(row.predicted_label ?? '0') === '1',
+            purchaseProbability: Number.isFinite(prob) ? prob : 0,
+            predictedLabel: String(row.predicted_label ?? '0'),
+            model: TESTBED_MODEL,
+            sourceTable: TESTBED_SOURCE_TABLE,
+            features: {
+                latest_ecommerce_progress: Number(row.latest_ecommerce_progress ?? 0),
+                bounces: String(row.bounces ?? ''),
+                time_on_site: Number(row.time_on_site ?? 0),
+                pageviews: Number(row.pageviews ?? 0),
+                source: row.source ?? '',
+                medium: row.medium ?? '',
+                channelGrouping: row.channelGrouping ?? '',
+                deviceCategory: row.deviceCategory ?? '',
+                country: row.country ?? '',
+            },
+        });
+    } catch (error) {
+        sendJson(res, 500, {
+            error: 'Failed to run testbed prediction',
+            details: error?.message ?? 'Unknown error',
+        });
+    }
+}
+
 function toNumberOrNull(value) {
     if (value === null || value === undefined) {
         return null;
@@ -584,6 +680,15 @@ const server = createServer(async (req, res) => {
             return;
         }
         await handleSegmentAICopy(reqUrl, res);
+        return;
+    }
+
+    if (pathname === '/api/testbed-predict') {
+        if (method !== 'GET') {
+            sendJson(res, 405, { error: 'Method not allowed' });
+            return;
+        }
+        await handleTestbedPrediction(reqUrl, res);
         return;
     }
 

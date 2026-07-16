@@ -28,15 +28,15 @@ export function Sidebar({ activeTab, setActiveTab }) {
               <span>📦</span> Order Details Explorer
             </button>
 
-            {/* Tab 2: Predict Visitor Purchases */}
+            {/* Tab 2: Run Predictions */}
             <button
-              onClick={() => setActiveTab('model1')}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model1'
+              onClick={() => setActiveTab('testbed')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'testbed'
                 ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
                 : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
                 }`}
             >
-              <span>🎯</span> Predict Visitor Purchases
+              <span>🧪</span> Run Predictions
             </button>
 
             {/* Tab 3: Customer Segments */}
@@ -48,6 +48,17 @@ export function Sidebar({ activeTab, setActiveTab }) {
                 }`}
             >
               <span>👥</span> Customer Segments
+            </button>
+
+            {/* Tab 4: Predictions Report */}
+            <button
+              onClick={() => setActiveTab('model1')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all ${activeTab === 'model1'
+                ? 'bg-[#f0f9ff] text-[#0284c7] font-bold'
+                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50 font-semibold'
+                }`}
+            >
+              <span>🎯</span> Predictions Report
             </button>
           </nav>
         </div>
